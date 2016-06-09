@@ -46,34 +46,39 @@ class AbstractPluginManagerModel
      */
     protected function getPlugins()
     {
-        if(is_array($this->plugins)) {
+        if (is_array($this->plugins)) {
             return $this->plugins;
         }
-    
-        $this->plugins = array();
+
+        $this->plugins = [];
         $services      = $this->pluginManager->getRegisteredServices();
         $factories     = array_flip(array_filter(
-            array_key_exists('factories', $services) && is_array($services['factories']) ? $services['factories'] : array(),
-            function($name) { return (bool)strstr($name, '\\'); }
+            array_key_exists('factories', $services) && is_array($services['factories']) ?
+              $services['factories'] : [],
+            function ($name) {
+                return (bool)strstr($name, '\\');
+            }
         ));
-        
+
         /**
-         * Get invokableClasses via reflection as getRegisteredServices() only returns service names which aren't classes in every case
+         * Get invokableClasses via reflection as getRegisteredServices() only returns
+         * service names which aren't classes in every case
          */
         $reflectionClass = new \ReflectionClass($this->pluginManager);
         $reflectionProperty = $reflectionClass->getProperty('invokableClasses');
         $reflectionProperty->setAccessible(true);
         $invokables = array_flip($reflectionProperty->getValue($this->pluginManager));
-    
+
         /**
          * Add the classes as plugins
          */
-        foreach(array_merge($invokables, $factories, $this->pluginManager->getCanonicalNames()) as $name => $canonical) {
+        $plugins = array_merge($invokables, $factories, $this->pluginManager->getCanonicalNames());
+        foreach ($plugins as $name => $canonical) {
             !in_array($name, $this->plugins) && ($this->plugins[] = $name);
         }
-    
+
         sort($this->plugins, SORT_STRING);
-    
+
         return $this->plugins;
     }
 }
