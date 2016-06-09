@@ -50,10 +50,10 @@ class AbstractPluginManagerModel
             return $this->plugins;
         }
     
-        $this->plugins = [];
+        $this->plugins = array();
         $services      = $this->pluginManager->getRegisteredServices();
         $factories     = array_flip(array_filter(
-            array_key_exists('factories', $services) && is_array($services['factories']) ? $services['factories'] : [],
+            array_key_exists('factories', $services) && is_array($services['factories']) ? $services['factories'] : array(),
             function($name) { return (bool)strstr($name, '\\'); }
         ));
         
